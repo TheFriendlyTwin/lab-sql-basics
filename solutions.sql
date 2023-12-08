@@ -137,32 +137,31 @@ group by account_id, case
 	end;
    
 /*Query 20
-From the previous result, modify your query so that it returns only one row, with a column for incoming amount, outgoing amount and the difference.*/
+From the previous result, modify your query so that it returns only one row, 
+with a column for incoming amount, outgoing amount and the difference.*/
 select account_id,
-	case 
-		when type = 'PRIJEM' then sum(amount)
-	end as 'Incoming',
-	case
-		when type = 'VYDAJ' then sum(amount)
-	end as 'Outgoing', 
+
+	round(sum(case when type = 'PRIJEM' then amount else 0 end), 0) as 'Incoming',
     
-    (case
-		when type = 'PRIJEM' then sum(amount)
-	end) - 
-    (case 
-		when type = 'VYDAJ' then sum(amount)
-	end)
+	round(sum(case when type = 'VYDAJ' then amount else 0 end), 0) as 'Outgoing',
     
-    from bank.trans
+	round(sum(case when type = 'PRIJEM' then amount else 0 end) - sum(case when type = 'VYDAJ' then amount else 0 end) ,0) as 'Subtraction'
+    
+from bank.trans
 where account_id = 396
-group by  account_id, 
-	case 
-		when type = 'PRIJEM' then sum(amount)
-	end,
-	case
-		when type = 'VYDAJ' then sum(amount)
-	end;
+group by  account_id;
     
 /*Query 21
 Continuing with the previous example, rank the top 10 account_ids based on their difference.*/
-        
+select account_id,
+
+	round(sum(case when type = 'PRIJEM' then amount else 0 end), 0) as 'Incoming',
+    
+	round(sum(case when type = 'VYDAJ' then amount else 0 end), 0) as 'Outgoing',
+    
+	round(sum(case when type = 'PRIJEM' then amount else 0 end) - sum(case when type = 'VYDAJ' then amount else 0 end) ,0) as 'Subtraction'
+    
+from bank.trans
+group by  account_id
+order by round(sum(case when type = 'PRIJEM' then amount else 0 end) - sum(case when type = 'VYDAJ' then amount else 0 end) ,0) desc
+limit 10;
